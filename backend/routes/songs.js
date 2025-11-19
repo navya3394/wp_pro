@@ -25,13 +25,19 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   fileFilter: function (req, file, cb) {
-    const allowedTypes = /mp3|wav|ogg|m4a/;
+    const allowedTypes = /mp3|wav|ogg|m4a|mpeg/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
+      console.log('Validation failed:');
+      console.log('Original name:', file.originalname);
+      console.log('Extension:', path.extname(file.originalname).toLowerCase());
+      console.log('Mimetype:', file.mimetype);
+      console.log('Extname check:', extname);
+      console.log('Mimetype check:', mimetype);
       cb(new Error('Only audio files are allowed!'));
     }
   }
@@ -99,11 +105,11 @@ router.put('/:id', async (req, res) => {
       { title, artist, album, genre },
       { new: true }
     );
-    
+
     if (!updatedSong) {
       return res.status(404).json({ message: 'Song not found' });
     }
-    
+
     res.json(updatedSong);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -114,7 +120,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const song = await Song.findById(req.params.id);
-    
+
     if (!song) {
       return res.status(404).json({ message: 'Song not found' });
     }
